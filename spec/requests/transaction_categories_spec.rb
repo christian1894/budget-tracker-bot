@@ -12,21 +12,18 @@
 # of tools you can use to make these specs even more expressive, but we're
 # sticking to rails and rspec-rails APIs to keep things simple and stable.
 
-RSpec.describe "/transaction_categories", type: :request do
-  
-  # TransactionCategory. As you add validations to TransactionCategory, be sure to
-  # adjust the attributes here as well.
+RSpec.describe "/transaction_categories", type: :request do  
   let(:valid_attributes) {
-    transaction_category = TransactionCategory.create(name: "some name")
-    expect(transaction_category.valid?).to eq(true)
+    {
+      name: "Some name",
+    }
   }
 
   let(:invalid_attributes) {
   }
-
   describe "GET /index" do
     it "renders a successful response" do
-      TransactionCategory.create! valid_attributes
+      create(:transaction_category)
       get transaction_categories_url
       expect(response).to be_successful
     end
@@ -34,7 +31,7 @@ RSpec.describe "/transaction_categories", type: :request do
 
   describe "GET /show" do
     it "renders a successful response" do
-      transaction_category = TransactionCategory.create! valid_attributes
+      transaction_category = create(:transaction_category)
       get transaction_category_url(transaction_category)
       expect(response).to be_successful
     end
@@ -49,7 +46,7 @@ RSpec.describe "/transaction_categories", type: :request do
 
   describe "GET /edit" do
     it "render a successful response" do
-      transaction_category = TransactionCategory.create! valid_attributes
+      transaction_category = create(:transaction_category)
       get edit_transaction_category_url(transaction_category)
       expect(response).to be_successful
     end
@@ -70,6 +67,11 @@ RSpec.describe "/transaction_categories", type: :request do
     end
 
     context "with invalid parameters" do
+      let(:invalid_attributes) {
+        {
+          name: nil
+        }
+      }
       it "does not create a new TransactionCategory" do
         expect {
           post transaction_categories_url, params: { transaction_category: invalid_attributes }
@@ -78,22 +80,30 @@ RSpec.describe "/transaction_categories", type: :request do
 
       it "renders a successful response (i.e. to display the 'new' template)" do
         post transaction_categories_url, params: { transaction_category: invalid_attributes }
-        expect(response).to be_successful
+        expect(response.status).to eq(422)
+        assert_template 'transaction_categories/new'
       end
     end
   end
 
   describe "PATCH /update" do
     context "with valid parameters" do
+      let(:valid_attributes) {
+        {
+          name: "some name"
+        }
+      }
       let(:new_attributes) {
-        skip("Add a hash of attributes valid for your model")
+        {
+          name: "new name"
+        }
       }
 
       it "updates the requested transaction_category" do
         transaction_category = TransactionCategory.create! valid_attributes
         patch transaction_category_url(transaction_category), params: { transaction_category: new_attributes }
         transaction_category.reload
-        skip("Add assertions for updated state")
+        expect(transaction_category.name).to eq(new_attributes[:name])
       end
 
       it "redirects to the transaction_category" do
@@ -105,10 +115,16 @@ RSpec.describe "/transaction_categories", type: :request do
     end
 
     context "with invalid parameters" do
+      let(:invalid_attributes) {
+        {
+          name: nil
+        }
+      }
       it "renders a successful response (i.e. to display the 'edit' template)" do
         transaction_category = TransactionCategory.create! valid_attributes
         patch transaction_category_url(transaction_category), params: { transaction_category: invalid_attributes }
-        expect(response).to be_successful
+        expect(response.status).to eq(422)
+        assert_template 'transaction_categories/edit' 
       end
     end
   end
